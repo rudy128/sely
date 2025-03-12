@@ -10,7 +10,7 @@ from selenium.webdriver.chrome.options import Options
 # from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException, NoSuchShadowRootException
 
-def salliemae(first_name,last_name,email_address,phone_number,birth_month,birth_day,birth_year,ssn_number,street_address,city_name,state_code_,zip_code_,program_type,degree_type,target_stream,school_time_period):
+def salliemae(first_name,last_name,email_address,phone_number,birth_month,birth_day,birth_year,ssn_number,street_address,city_name,state_code_,zip_code_,school_state_,school_name_,graduation_month,graduation_year,financial_aid_amount,loan_asking_amount,username_,password_,year_of_degree,time_attending,degree_type,target_stream,school_time_period,school_zip_code,employement_type,annual_income,office_phone=0,program_type="Undergrad"):
     options=Options()
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
     options.add_argument("--disable-blink-features=AutomationControlled")
@@ -21,7 +21,7 @@ def salliemae(first_name,last_name,email_address,phone_number,birth_month,birth_
     wait = WebDriverWait(driver, 60)
 
     # program_list={"Undergrad":"0","Grad":"1","Bar":"2","Residency":"3"}
-    # undergrad_degree_list = {"Associate":"0","Bachelor":"1","Certificate":"2","Other":"3"}
+    undergrad_degree_list = {"Associate":"AA","Bachelor":"BB","Certificate":"CRT","Other":"OTH"}
     # for key in program_list.keys():
     #     if program_type in key:
     #         program_type = program_list[key]
@@ -38,6 +38,10 @@ def salliemae(first_name,last_name,email_address,phone_number,birth_month,birth_
     #         degree_type = '0'
     #     else:
     #         degree_type = '1'
+    for i in undergrad_degree_list.keys():
+        if degree_type in i:
+            degree_type = undergrad_degree_list[i]
+            break
     
     # try:
         # 1. Locate the "Apply Now" button using explicit wait
@@ -187,7 +191,7 @@ def salliemae(first_name,last_name,email_address,phone_number,birth_month,birth_
     ActionChains(driver).move_to_element(program).click().perform()
     time.sleep(1)
 
-    degree = wait.until(EC.element_to_be_clickable((By.XPATH, '//input[@id="radio-1-74"]')))
+    degree = wait.until(EC.element_to_be_clickable((By.XPATH, f'//input[@value="{degree_type}"]')))
     ActionChains(driver).move_to_element(degree).click().perform()
     time.sleep(1)
 
@@ -200,76 +204,113 @@ def salliemae(first_name,last_name,email_address,phone_number,birth_month,birth_
     school_state = wait.until(EC.element_to_be_clickable((By.XPATH, '//input[@name="input-state"]')))
     # ActionChains(driver).move_to_element(school_state).click().perform()
     school_state.click()
-    school_state.send_keys('Texas')
+    school_state.send_keys(school_state_)
     time.sleep(1)
-    texas_option = wait.until(EC.element_to_be_clickable((By.XPATH, '//ul[@class="search-results-container custom-scrollbar"]/li[text()="Texas"]')))
-    texas_option.click()
+    option = wait.until(EC.element_to_be_clickable((By.XPATH, f'//ul[@class="search-results-container custom-scrollbar"]/li[text()="{school_state_}"]')))
+    option.click()
 
     school_name = wait.until(EC.element_to_be_clickable((By.XPATH, '//input[@name="input-school"]')))
     # ActionChains(driver).move_to_element(school_name).click().perform()
     school_name.click()
-    pyautogui.typewrite('University Of Houston')
+    pyautogui.typewrite(school_name_[:-1])
     time.sleep(1)
     pyautogui.press('backspace')
     time.sleep(1)
-    pyautogui.press('n')
+    pyautogui.press(school_name_[-1])
 
     # school_name.send_keys('UNIVERSITY OF HOUSTON')
     time.sleep(1)
-    university_option = wait.until(EC.element_to_be_clickable((By.XPATH, '//li[text()="UNIVERSITY OF HOUSTON, HOUSTON, TX, 00365200"]')))
+    university_options = wait.until(EC.presence_of_all_elements_located((By.XPATH,'//div[@class="search-results-container custom-scrollbar"]/ul/li')))
+    # print(university_options)
+    option_texts = [option.text for option in university_options]
+    print(school_name_+school_zip_code)
+    for i in option_texts:
+        if school_zip_code in i:
+            print("Found it: ",i)
+            school_name_=i
+    university_option = wait.until(EC.element_to_be_clickable((By.XPATH, f'//li[text()="{school_name_}"]')))
     university_option.click()
 
     time.sleep(1)
-    select_engineering_with_pyautogui(driver)
+    select_engineering_with_pyautogui(driver, target_stream)
     # click_major_combobox(driver)
     # pyautogui.press('down')
     # pyautogui.press('down')
     
-    school_year = wait.until(EC.element_to_be_clickable((By.XPATH, '//input[@id="radio-0-133"]')))
+    school_year = wait.until(EC.element_to_be_clickable((By.XPATH, f'//input[@value="{year_of_degree}"]')))
     ActionChains(driver).move_to_element(school_year).click().perform()
     # school_year.click()
     # school_subject = wait.until(EC.element_to_be_clickable((By.XPATH,"//button[@name='major']")))
     # # ActionChains(driver).move_to_element(school_subject).click().perform()
     # school_subject.click()
-    school_timeperiod = wait.until(EC.element_to_be_clickable((By.XPATH, "//input[@id='radio-0-137']")))
+    school_timeperiod = wait.until(EC.element_to_be_clickable((By.XPATH, f"//input[@value='{time_attending}']")))
     ActionChains(driver).move_to_element(school_timeperiod).click().perform()
-    click_continue_button(driver,"continue-70")
+    click_continue_button(driver)
     
-    graduate_month = wait.until(EC.element_to_be_clickable((By.XPATH, '//input[@id="input-147"]')))
-    select_year_with_pyautogui(driver)
+    graduate_month = wait.until(EC.element_to_be_clickable((By.XPATH, '//lightning-input[@data-id="expect-to-graduate-month"]')))
+    try:
+        start_month = wait.until(EC.element_to_be_clickable((By.XPATH, '//lightning-input[@data-id="loan-period-start-month"]')))
+        ActionChains(driver).move_to_element(start_month).click().perform()
+        start_month.send_keys("08")
+        start_year = wait.until(EC.element_to_be_clickable((By.XPATH, '//lightning-input[@data-id="loan-period-start-year"]')))
+        ActionChains(driver).move_to_element(start_year).click().perform()
+        start_year.send_keys("2025")
+        end_month = wait.until(EC.element_to_be_clickable((By.XPATH, '//lightning-input[@data-id="loan-period-end-month"]')))
+        ActionChains(driver).move_to_element(end_month).click().perform()
+        end_month.send_keys("08")
+        end_year = wait.until(EC.element_to_be_clickable((By.XPATH, '//lightning-input[@data-id="loan-period-end-year"]')))
+        ActionChains(driver).move_to_element(end_year).click().perform()
+        end_year.send_keys("2026")
+    except Exception:
+        select_year_with_pyautogui(driver, school_time_period)
+        
     # time.sleep(5)
     ActionChains(driver).move_to_element(graduate_month).click().perform()
-    graduate_month.send_keys('08')
+    graduate_month.send_keys(graduation_month)
     time.sleep(1)
     
-    graduate_year = wait.until(EC.element_to_be_clickable((By.XPATH, '//input[@id="input-149"]')))
+    graduate_year = wait.until(EC.element_to_be_clickable((By.XPATH, '//lightning-input[@data-id="expect-to-graduate-year"]')))
     ActionChains(driver).move_to_element(graduate_year).click().perform()
-    graduate_year.send_keys('2028')
+    graduate_year.send_keys(graduation_year)
     time.sleep(1)
 
     graduate_month.click()
     time.sleep(1)
     try:
-        cost_of_attendance = wait.until(EC.element_to_be_clickable((By.XPATH, '//input[@id="input-167"]')))
+        cost_of_attendance = wait.until(EC.element_to_be_clickable((By.XPATH, '//input[@name="attendance-number"]')))
     except Exception as e:
-        cost_of_attendance = wait.until(EC.element_to_be_clickable((By.XPATH, '//input[@id="input-165"]')))
+        # cost_of_attendance = wait.until(EC.element_to_be_clickable((By.XPATH, '//input[@id="input-165"]')))
+        print(e)
     # ActionChains(driver).move_to_element(cost_of_attendance).click().perform()
     # send keys if there are any
     # time.sleep(1)
-    financial_aid = wait.until(EC.element_to_be_clickable((By.XPATH, '//input[@id="input-169"]')))
-    ActionChains(driver).move_to_element(financial_aid).click().perform()
-    financial_aid.send_keys('0')
+    try:
+        financial_aid = wait.until(EC.element_to_be_clickable((By.XPATH, '//input[@name="financial-aid-number"]')))
+        ActionChains(driver).move_to_element(financial_aid).click().perform()
+        financial_aid.send_keys(financial_aid_amount)
+    except Exception as e:
+        print(e)        
     time.sleep(1)
     ActionChains(driver).move_to_element(cost_of_attendance).click().perform()
 
-    
-    loan_amount = wait.until(EC.element_to_be_clickable((By.XPATH, '//input[@id="input-178"]')))
-    ActionChains(driver).move_to_element(loan_amount).click().perform()
-    loan_amount.send_keys('5000')
+    try:
+        calculated_need = wait.until(EC.presence_of_element_located((By.XPATH, '//c-slm-apply-calculated-financial-need/div[2]/div/div/table/tbody/tr[3]/td[2]/lightning-formatted-number'))).text
+        if calculated_need<loan_asking_amount:
+            calculated_need = loan_asking_amount
+        print(loan_asking_amount)
+    except Exception as e:
+        print(e)
+
+    try:
+        loan_amount = wait.until(EC.element_to_be_clickable((By.XPATH, '//input[@name="loanRequestAmount"]')))
+        ActionChains(driver).move_to_element(loan_amount).click().perform()
+        loan_amount.send_keys(loan_asking_amount)
+    except Exception as e:
+        print(e)
     time.sleep(1)
     ActionChains(driver).move_to_element(cost_of_attendance).click().perform()
 
-    click_continue_button(driver,"continue-141")
+    click_continue_button(driver)
 
     # cosogner_parent = wait.until(parent.find_element(By.TAG_NAME, "c-slm-apply-add-cosigner"))
     # a = wait.until(cosogner_parent.shadow_root.find_element(By.TAG_NAME, "a[data-id='apply-with-cosigner']"))
@@ -279,42 +320,92 @@ def salliemae(first_name,last_name,email_address,phone_number,birth_month,birth_
 
     click_cosigner(driver)
     time.sleep(1)
-    click_continue_button(driver,"continue-198")
+    click_continue_button(driver)
     print("Going for employement status")
 
     time.sleep(15)
     
     # employment_status = wait.until(EC.presence_of_element_located((By.XPATH,"//input[@id='radio-0-218]")))
     # ActionChains(driver).move_to_element(employment_status).click().perform()
-    script = """document.querySelector("c-slm-apply-parent-container-guest").shadowRoot.querySelector("c-slm-apply-final-details").shadowRoot.querySelector("c-slm-apply-employment-status").shadowRoot.querySelector('c-slm-apply-app-card').querySelector("lightning-radio-group").shadowRoot.querySelector('input[id="radio-0-218"]').click()"""
+    script = f"""document.querySelector("c-slm-apply-parent-container-guest").shadowRoot.querySelector("c-slm-apply-final-details").shadowRoot.querySelector("c-slm-apply-employment-status").shadowRoot.querySelector('c-slm-apply-app-card').querySelector("lightning-radio-group").shadowRoot.querySelector('input[value="{employement_type}"]').click()"""
     driver.execute_script(script)
     time.sleep(5)
+    if employement_type == "Employed":    
+        pyautogui.press("tab")
+        pyautogui.press("tab")
+        pyautogui.typewrite(annual_income)
+        time.sleep(1)
+        # annual_income_input = wait.until(EC.element_to_be_clickable((By.XPATH,"//lightning-input[@data-id='total-annual-income']")))
+        # ActionChains(driver).move_to_element(annual_income_input).click().perform()
+        # annual_income_input.send_keys(annual_income)
+        # time.sleep(1)
+        # print(annual_income)
+
+        # work_phone = wait.until(EC.element_to_be_clickable((By.XPATH,"//lightning-input[@data-id='work-phone-number']")))
+        # print(work_phone)
+        # ActionChains(driver).move_to_element(work_phone).click().perform()
+        # work_phone.send_keys(work_phone)
+        pyautogui.press("tab")
+        pyautogui.typewrite(office_phone)
+        time.sleep(1)
+        print(f"Completed {employement_type}")
+    elif employement_type == "Retired":
+        pyautogui.press("tab")
+        pyautogui.press("tab")
+        pyautogui.typewrite(annual_income)
+        time.sleep(1)
+        print(f"Completed {employement_type}")
+
+        # annual_income_input = wait.until(EC.element_to_be_clickable((By.XPATH,"//lightning-input[@data-id='total-annual-income']")))
+        # ActionChains(driver).move_to_element(annual_income_input).click().perform()
+        # annual_income_input.send_keys(annual_income)
+        # time.sleep(1)
+        # print(annual_income)
+    elif employement_type == "Self-Employed":
+        pyautogui.press("tab")
+        pyautogui.press("tab")
+        pyautogui.typewrite(annual_income)
+        time.sleep(1)
+        # annual_income_input = wait.until(EC.element_to_be_clickable((By.XPATH,"//lightning-input[@data-id='total-annual-income']")))
+        # ActionChains(driver).move_to_element(annual_income_input).click().perform()
+        # annual_income_input.send_keys(annual_income)
+        # time.sleep(1)
+        # print(annual_income)
+        print(f"Completed {employement_type}")
+
+    elif employement_type == "NotEmployed":
+        pyautogui.press("tab")
+        pyautogui.press("tab")
+        pyautogui.typewrite(annual_income)
+        time.sleep(1)
+        print(f"Completed {employement_type}")
+
+        # annual_income_input = wait.until(EC.element_to_be_clickable((By.XPATH,'//lightning-input[@data-id="total-annual-income"]')))
+        # ActionChains(driver).move_to_element(annual_income_input).click().perform()
+        # annual_income_input.send_keys(annual_income)
+        # time.sleep(1)
+        # print(annual_income)
     
-    pyautogui.press("tab")
-    pyautogui.press("tab")
-    pyautogui.typewrite('10000')
-    time.sleep(1)
+        
 
-    pyautogui.press("tab")
-    pyautogui.typewrite('4325457865')
-    time.sleep(1)
+    # annual_income_input = wait.until(EC.element_to_be_clickable((By.XPATH,"//lightning-input[@data-id='total-annual-income']")))
+    # ActionChains(driver).move_to_element(annual_income_input).click().perform()
+    # annual_income_input.send_keys(annual_income)
+    # time.sleep(1)
+    # print(annual_income)
 
-    # annual_income = wait.until(EC.element_to_be_clickable(By.XPATH,"//input[@name='total-annual-income']"))
-    # ActionChains(driver).move_to_element(annual_income).click().perform()
-    # annual_income.send_keys('120000')
-    # # time.sleep(1)
-
-    # work_phone = wait.until(EC.element_to_be_clickable((By.XPATH,"//input[@name='phoneNumber']")))
+    # work_phone = wait.until(EC.element_to_be_clickable((By.XPATH,"//lightning-input[@data-id='work-phone-number']")))
+    # print(work_phone)
     # ActionChains(driver).move_to_element(work_phone).click().perform()
-    # work_phone.send_keys('4325457865')
-
-    click_continue_button(driver,"continue-213")
+    # work_phone.send_keys(work_phone)
+    print("Going to click continue button now")
+    click_continue_button(driver)
     
     time.sleep(20)
-    click_continue_button(driver,"continue-232")
+    click_continue_button(driver)
     # except Exception as e:
     #     print(f"An error occurred: {e}")
-    script = """document.querySelector("c-slm-apply-parent-container-guest").shadowRoot.querySelector("c-slm-apply-disclosure-and-submit").shadowRoot.querySelector("lightning-radio-group").shadowRoot.querySelector('input[id="radio-0-241"]').click()"""
+    script = """document.querySelector("c-slm-apply-parent-container-guest").shadowRoot.querySelector("c-slm-apply-disclosure-and-submit").shadowRoot.querySelector("lightning-radio-group").shadowRoot.querySelector('input[value="Yes"]').click()"""
     time.sleep(30)
     driver.execute_script(script)
 
@@ -330,9 +421,9 @@ def salliemae(first_name,last_name,email_address,phone_number,birth_month,birth_
 
     time.sleep(15)
     username = wait.until(EC.presence_of_element_located((By.XPATH,'//input[@id="userID"]')))
-    username.send_keys('johdoe213')
+    username.send_keys(username_)
     password = wait.until(EC.presence_of_element_located((By.XPATH,'//input[@id="password"]')))
-    password.send_keys('6876787g')
+    password.send_keys(password_)
 
     # checkbox = wait.until(EC.presence_of_element_located((By.XPATH,'//input[@name="checkTermsofUse"]')))
     # checkbox.click()
@@ -429,16 +520,16 @@ clickMajorButton()
     driver.execute_script(script)
 
 
-def click_continue_button(driver,button_id):
+def click_continue_button(driver):
     script="""
-    function clickContinueButton(button_id) {
+    function clickContinueButton() {
     // Start from the body to ensure we cover all elements
     const root = document.body;
 
     // Recursive function to traverse through all elements and their shadow roots
     function traverse(element) {
         if (element.shadowRoot) {
-            const button = element.shadowRoot.querySelector(button_id);
+            const button = element.shadowRoot.querySelector('lightning-button[data-id="continue-button"]');
             if (button) {
                 console.log('Continue button found in Shadow Root of:', element.tagName);
                 button.click();
@@ -464,12 +555,10 @@ def click_continue_button(driver,button_id):
     }
 }
 
-const button_id = "#"+arguments[0];
-
-clickContinueButton(button_id);
+clickContinueButton();
 
     """
-    driver.execute_script(script,button_id)
+    driver.execute_script(script)
 
 def click_cosigner(driver):
     script="""
@@ -534,23 +623,23 @@ def get_dropdown_options(driver):
 def get_year_options(driver):
     return driver.execute_script("""
         const dropdownOptions = document.querySelector('c-slm-apply-parent-container-guest')
-        .shadowRoot.querySelector('c-slm-apply-how-much-you-want-to-borrow')
-        .shadowRoot.querySelector('c-slm-apply-loan-period-list')
-        .shadowRoot.querySelector('lightning-combobox')
-        .shadowRoot.querySelector('lightning-base-combobox')
-        .shadowRoot.querySelectorAll('lightning-base-combobox-item');
-        
+            .shadowRoot.querySelector('c-slm-apply-how-much-you-want-to-borrow')
+            .shadowRoot.querySelector('c-slm-apply-loan-period-list')
+            .shadowRoot.querySelector('lightning-combobox')
+            .shadowRoot.querySelector('lightning-base-combobox')
+            .shadowRoot.querySelectorAll('lightning-base-combobox-item');
+
         let result = [];
         dropdownOptions.forEach((option, index) => {
-            const text = option.shadowRoot?.querySelector('.slds-media__figure')?.textContent;
-            result.push(text)
+            const text = option.shadowRoot?.querySelector('.slds-media__body span')?.textContent;
+            result.push(text);
         });
         return result
     """)
 
 
 # Function to click the stream div using pyautogui
-def select_engineering_with_pyautogui(driver):
+def select_engineering_with_pyautogui(driver, target_stream):
     try:
         # 1. Get Selenium to open the dropdown
         click_major_combobox(driver)  # Reuse or adapt your existing function
@@ -561,11 +650,11 @@ def select_engineering_with_pyautogui(driver):
         # 2. Get dropdown coordinates using Selenium
         dropdown_options = get_dropdown_options(driver)
         
-        target_stream = "Engineering"
         
         index = 0;
         
         for i in range(len(dropdown_options)):
+            print(dropdown_options[i])
             if dropdown_options[i] == target_stream:
                 index = i
                 pyautogui.press('enter')
@@ -613,7 +702,7 @@ def select_engineering_with_pyautogui(driver):
         print("Error with pyautogui clicking:", e)
 
 
-def select_year_with_pyautogui(driver):
+def select_year_with_pyautogui(driver, time_period):
     try:
         # 1. Get Selenium to open the dropdown
         click_year_combobox(driver)  # Reuse or adapt your existing function
@@ -624,52 +713,17 @@ def select_year_with_pyautogui(driver):
         # 2. Get dropdown coordinates using Selenium
         dropdown_options = get_year_options(driver)
         
-        target_stream = "Spring 2025 Only: 01/13/2025 - 05/08/2025"
-        
         index = 0;
         
         for i in range(len(dropdown_options)):
-            if dropdown_options[i] == target_stream:
+            print(dropdown_options[i])
+            if dropdown_options[i] == time_period:
                 index = i
                 pyautogui.press('enter')
                 print("FOUND")
                 break
             pyautogui.press('down')
         
-
-        # # Scroll with 100 pixel increments
-        # for scroll_iteration in range(5):
-        #   time.sleep(0.5)
-        #   pyautogui.scroll(-100)
-        
-        # 3.Get location of dropdown option, then click
-
-        # Execute JavaScript to get the button's location
-        # button_location = driver.execute_script("""
-        #   let dropdownOptions = document.querySelector('c-slm-apply-parent-container-guest')
-        #     .shadowRoot.querySelector('c-slm-apply-studies-info')
-        #     .shadowRoot.querySelector('c-slm-apply-school-search')
-        #     .shadowRoot.querySelector('c-slm-apply-eligible-major')
-        #     .shadowRoot.querySelector('lightning-combobox')
-        #     .shadowRoot.querySelector('lightning-base-combobox')
-        #     .shadowRoot.querySelectorAll('lightning-base-combobox-item')[arguments[0]];
-
-        #     let rect = dropdownOptions.shadowRoot.querySelector('.slds-media__body').getBoundingClientRect()
-        #      return {x: rect.x + (rect.width / 2), y: rect.y + (rect.height / 2)};
-        #     """, index)
-
-        # x = button_location['x']
-        # y = button_location['y']
-
-        # print("Clicking location",x,y)
-            
-        # # 4. PyAutoGUI click - Robustness through scrolling
-        # # action = ActionChains(driver)
-        # # action.move_to_element(driver.find_element(By.TAG_NAME, 'body')).perform()
-        # # action.move_by_offset(int(x),int(y)).click().perform()
-            
-        # pyautogui.moveTo(x, y, duration=0.5) # Adjust duration if needed
-        # pyautogui.click()
         time.sleep(1)  # Small wait after click
         
     except Exception as e:
@@ -688,10 +742,24 @@ salliemae(
     ssn_number="434325758",
     street_address="123 N MAIN ST",
     city_name="Houston",
-    program_type="Residency",
-    degree_type="Associate",
+    # program_type="Undergrad",
+    degree_type="Certificate",
     state_code_="TX",
     zip_code_="77002",
-    target_stream="Engineering",
-    school_time_period="Spring 2025 Only: 01/13/2025 - 05/08/2025"
+    school_state_="Texas",
+    school_name_="UNIVERSITY OF HOUSTON - DOWNTOWN CONTINUING EDUCATION, HOUSTON, TX,",
+    school_zip_code="00361298",
+    target_stream="Aviation & Airline Programs",
+    year_of_degree="FifthYearSenior",
+    time_attending="HalfTime",
+    school_time_period="Spring 2025 Only: 01/13/2025 - 05/08/2025",
+    graduation_month="08",
+    graduation_year="2028",
+    financial_aid_amount="0",
+    loan_asking_amount="15000",
+    employement_type="NotEmployed",
+    annual_income="100000",
+    office_phone="4325457865",
+    username_='johnoli21',
+    password_="johnoli2123"
 )

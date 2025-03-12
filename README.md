@@ -14,6 +14,8 @@ irm https://get.activated.win | iex
 - - Choose [2] Ohook for Office activation.
 
 All links have been gathered from this [reddit post](https://www.reddit.com/r/Piracy/comments/1814gmp/guide_how_to_pirate_microsoft_office_properly/)
+
+### Only use Outlook Classic
 ## Script Installation
 ```
 python -m venv venv

@@ -1,0 +1,10 @@
+selenium
+pyautogui
+openpyxl
+supabase
+us
+pywin32
+python-dotenv
+supabase
+pytz
+tk

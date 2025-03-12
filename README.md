@@ -19,7 +19,7 @@ All links have been gathered from this [reddit post](https://www.reddit.com/r/Pi
 ## Script Installation
 ```
 python -m venv venv
-pip install selenium pyautogui openpyxl supabase us pywin32 python-dotenv supabase pytz
+pip install -r /path/to/requirements.txt
 ```
 
 # Run script for Automation
